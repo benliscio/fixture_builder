@@ -57,7 +57,7 @@ class NamerTest < Test::Unit::TestCase
     }
     assert_equal 'foo', @namer.record_name(hash, Model.table_name, '000')
   end
-  
+
   def test_name_not_unique_across_tables
     hash = {
       'id' => 1,

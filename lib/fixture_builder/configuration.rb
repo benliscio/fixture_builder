@@ -17,7 +17,7 @@ module FixtureBuilder
 
     ACCESSIBLE_ATTRIBUTES = [:select_sql, :delete_sql, :skip_tables, :files_to_check, :record_name_fields,
                              :fixture_builder_file, :fixture_directory, :after_build, :legacy_fixtures, :model_name_procs,
-                             :write_empty_files]
+                             :write_empty_files, :table_name_to_class_map]
     attr_accessor(*ACCESSIBLE_ATTRIBUTES)
 
     SCHEMA_FILES = ['db/schema.rb', 'db/development_structure.sql', 'db/test_structure.sql', 'db/production_structure.sql']
@@ -106,11 +106,15 @@ module FixtureBuilder
     end
 
     def fixture_directory
-      @fixture_directory ||= FixturesPath.absolute_rails_fixtures_path
+      @fixture_directory ||= File.expand_path(File.join(::Rails.root, "spec", "fixtures"))
     end
 
     def fixtures_dir(path = '')
       File.expand_path(File.join(fixture_directory, path))
+    end
+
+    def table_name_to_class_map
+      @table_name_to_class_map ||= {}
     end
 
     private

@@ -87,7 +87,7 @@ module FixtureBuilder
 
     def dump_empty_fixtures_for_all_tables
       tables.each do |table_name|
-        write_fixture_file({}, table_name)
+        write_fixture_file({}, table_name, nil)
       end
     end
 
@@ -96,7 +96,7 @@ module FixtureBuilder
       Date::DATE_FORMATS[:default] = Date::DATE_FORMATS[:db]
       begin
         fixtures = tables.inject([]) do |files, table_name|
-          table_klass = table_name.classify.constantize rescue nil
+          table_klass = (table_name.classify.constantize rescue nil) || table_name_to_class_map[table_name.to_sym]
           if table_klass && table_klass < ActiveRecord::Base
             rows = table_klass.unscoped do
               table_klass.order(:id).all.collect do |obj|
@@ -110,6 +110,7 @@ module FixtureBuilder
           else
             rows = ActiveRecord::Base.connection.select_all(select_sql % {table: ActiveRecord::Base.connection.quote_table_name(table_name)})
           end
+
           next files if rows.empty?
 
           row_index = '000'
@@ -117,7 +118,7 @@ module FixtureBuilder
             hash.merge(record_name(record, table_name, row_index) => record)
           end
 
-          write_fixture_file fixture_data, table_name
+          write_fixture_file(fixture_data, table_name, table_klass)
 
           files + [File.basename(fixture_file(table_name))]
         end
@@ -147,9 +148,10 @@ module FixtureBuilder
       end
     end
 
-    def write_fixture_file(fixture_data, table_name)
+    def write_fixture_file(fixture_data, table_name, table_klass)
       File.open(fixture_file(table_name), 'w') do |file|
-        file.write fixture_data.to_yaml
+        fixture_data = fixture_data.merge({ "_fixture" => { "model_class" => table_klass.name } }) if table_klass
+        file.write(fixture_data.to_yaml)
       end
     end
 
