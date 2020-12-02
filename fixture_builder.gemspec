@@ -20,7 +20,6 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.homepage = %q{http://github.com/rdy/fixture_builder}
-  s.rubyforge_project = %q{fixture_builder}
   s.summary = %q{Build Rails fixtures using object mother factories}
 
   s.add_dependency %q{activerecord}, '>= 2'
